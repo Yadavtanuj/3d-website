@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Objects with Three.js</title>
+    <title>Advanced 3D Scene with Three.js</title>
     <style>
         body { margin: 0; }
         canvas { display: block; }
@@ -20,25 +20,55 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        // Adding a 3D Cube
-        const geometry = new THREE.BoxGeometry();
-        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-        const cube = new THREE.Mesh(geometry, material);
+        // Adding a Plane with Texture
+        const textureLoader = new THREE.TextureLoader();
+        const floorTexture = textureLoader.load('https://threejsfundamentals.org/threejs/resources/images/wall.jpg');
+        floorTexture.wrapS = THREE.RepeatWrapping;
+        floorTexture.wrapT = THREE.RepeatWrapping;
+        floorTexture.repeat.set(10, 10);
+        const floorMaterial = new THREE.MeshBasicMaterial({ map: floorTexture });
+        const floorGeometry = new THREE.PlaneGeometry(20, 20);
+        const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+        floor.rotation.x = - Math.PI / 2;
+        scene.add(floor);
+
+        // Adding a 3D Cube with Texture
+        const cubeTexture = textureLoader.load('https://threejsfundamentals.org/threejs/resources/images/wall.jpg');
+        const cubeMaterial = new THREE.MeshBasicMaterial({ map: cubeTexture });
+        const cubeGeometry = new THREE.BoxGeometry();
+        const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+        cube.position.set(0, 1, 0);
         scene.add(cube);
 
-        // Adding another 3D Sphere
+        // Adding a 3D Sphere with Phong Material
         const sphereGeometry = new THREE.SphereGeometry(1, 32, 32);
-        const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        const sphereMaterial = new THREE.MeshPhongMaterial({ color: 0xff0000 });
         const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-        sphere.position.set(3, 0, 0);
+        sphere.position.set(3, 1, 0);
         scene.add(sphere);
 
+        // Adding a Torus Knot
+        const torusKnotGeometry = new THREE.TorusKnotGeometry(1, 0.3, 100, 16);
+        const torusKnotMaterial = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
+        const torusKnot = new THREE.Mesh(torusKnotGeometry, torusKnotMaterial);
+        torusKnot.position.set(-3, 1, 0);
+        scene.add(torusKnot);
+
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0x404040); // soft white light
+        scene.add(ambientLight);
+
+        const pointLight = new THREE.PointLight(0xffffff, 1, 100);
+        pointLight.position.set(5, 5, 5);
+        scene.add(pointLight);
+
         // Camera Position
-        camera.position.z = 5;
+        camera.position.set(0, 5, 10);
+        camera.lookAt(0, 0, 0);
 
         // Orbit Controls for Zoom and Rotate
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
+        controls.enableDamping = true;
         controls.dampingFactor = 0.25;
         controls.screenSpacePanning = false;
         controls.maxPolarAngle = Math.PI / 2;
@@ -47,13 +77,28 @@
         function animate() {
             requestAnimationFrame(animate);
 
-            // You can add any animation code here
-            controls.update(); // only required if controls.enableDamping = true, or if controls.autoRotate = true
+            // Rotate the objects
+            cube.rotation.x += 0.01;
+            cube.rotation.y += 0.01;
 
+            sphere.rotation.x += 0.01;
+            sphere.rotation.y += 0.01;
+
+            torusKnot.rotation.x += 0.01;
+            torusKnot.rotation.y += 0.01;
+
+            controls.update();
             renderer.render(scene, camera);
         }
 
         animate();
+
+        // Resize Handler
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
     </script>
 </body>
 </html>
